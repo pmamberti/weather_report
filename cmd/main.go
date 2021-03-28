@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 type WeatherData struct {
@@ -25,10 +28,12 @@ func main() {
 	if api_key == "" {
 		log.Fatalf("No API key found in env")
 	}
-	location := url.PathEscape("las palmas")
-	fmt.Println(location)
-	url := "https://api.openweathermap.org/data/2.5/weather?units=metric&q=" + location + "&appid=" + api_key
+	location := strings.Join(os.Args[1:], " ")
+	if cmp.Equal(os.Args[1:], []string{}) {
+		log.Fatalf("No city specified, exiting...")
+	}
 
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?units=metric&q=%v&appid=%v", url.PathEscape(location), api_key)
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatalf("Cannot complete GET request: %v", err)
@@ -50,5 +55,5 @@ func main() {
 
 	desc := j.Weather[0].Main
 	temp := j.Main.Temp
-	fmt.Println(desc, temp)
+	fmt.Printf("In %v, the weather is \"%v\" and the temperature is %v degrees (Celsius, obviously!)", location, desc, temp)
 }
