@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"weather_cli/cli"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -20,6 +21,11 @@ type WeatherData struct {
 	Main struct {
 		Temp float64 `json:"temp"`
 	}
+}
+
+func Run(args []string) cli.Data {
+	e := cli.Parse(os.Args)
+	return e
 }
 
 func weather() {

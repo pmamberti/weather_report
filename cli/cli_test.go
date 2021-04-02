@@ -1,17 +1,15 @@
 package cli_test
 
 import (
-	"fmt"
+	"os"
 	"testing"
 	"weather_cli/cli"
 )
 
-func TestParseInput(t *testing.T) {
+func TestParse(t *testing.T) {
 	t.Parallel()
-	want := cli.Data{Location: "las palmas", Unit: "kelvin"}
-	testInput := fmt.Sprintf("cmd --city=%v --unit=%v", want.Location, want.Unit)
-
-	got := cli.ParseInput(testInput)
+	want := cli.Data{Location: "London", Unit: "metric"}
+	got := cli.Parse(os.Args)
 
 	if got != want {
 		t.Errorf("want %v, got %v", want, got)
