@@ -1,10 +1,13 @@
 package cli
 
+import "fmt"
+
 type Data struct {
 	Location string
 	Unit     string
 }
 
-func ParseInput(string) Data {
-	return Data{Location: "london", Unit: "metric"}
+func Run(args []string) Data {
+	fmt.Println(args[1])
+	return Data{}
 }
