@@ -1,4 +1,4 @@
-module example.com/weather_cli
+module weather_cli
 
 go 1.16
 
