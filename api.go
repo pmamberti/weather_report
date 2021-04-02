@@ -1,4 +1,4 @@
-package weather
+package api
 
 import (
 	"encoding/json"
@@ -8,48 +8,45 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
-	"weather_cli/cli"
 
 	"github.com/google/go-cmp/cmp"
 )
 
 type WeatherData struct {
 	Weather []struct {
-		Main string `json:"main"`
+		Main        string `json:"main"`
+		Description string `json:"description"`
 	} `json:"weather"`
 	Main struct {
 		Temp float64 `json:"temp"`
 	}
 }
 
-func Run(args []string) cli.Data {
-	e := cli.Parse(os.Args)
-	return e
-}
-
-func weather() {
+func GetWeather(location, unit string) {
 	api_key := os.Getenv("OWM_KEY")
 	if api_key == "" {
 		log.Fatalf("No API key found in env")
 	}
-	location := strings.Join(os.Args[1:], " ")
-	if cmp.Equal(os.Args[1:], []string{}) {
+
+	l := location
+	if cmp.Equal(l, "") {
 		log.Fatalf("No city specified, exiting...")
 	}
 
-	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?units=metric&q=%v&appid=%v", url.PathEscape(location), api_key)
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?units=%v&q=%v&appid=%v", unit, url.PathEscape(location), api_key)
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatalf("Cannot complete GET request: %v", err)
 	}
 	if res.StatusCode != http.StatusOK {
+		// TODO: check how to get the message and make this more informative
+		// e.g. {"cod":"404","message":"city not found"}%
 		log.Fatalf("Unexpected Status: %v", res.StatusCode)
 	}
 
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Fatalf("Cannot read data from body: %v", err)
+		log.Fatalf("Cannot read data from request body: %v", err)
 	}
 
 	var j WeatherData
@@ -58,7 +55,6 @@ func weather() {
 		log.Fatalf("Unable to Marshal data %v", err)
 	}
 
-	desc := j.Weather[0].Main
-	temp := j.Main.Temp
-	fmt.Printf("In %v, the weather is \"%v\" and the temperature is %v degrees (Celsius, obviously!)", location, desc, temp)
+	fmt.Printf("In %v, the weather is %v, with %v. \nThe temperature is %v degrees.",
+		location, j.Weather[0].Main, j.Weather[0].Description, j.Main.Temp)
 }

@@ -2,9 +2,10 @@ package main
 
 import (
 	"os"
-	weather "weather_cli"
+	api "weather_cli"
+	"weather_cli/cli"
 )
 
 func main() {
-	weather.Run(os.Args)
+	api.GetWeather(cli.Parse(os.Args))
 }
