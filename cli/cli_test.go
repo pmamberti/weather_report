@@ -8,10 +8,11 @@ import (
 
 func TestParse(t *testing.T) {
 	t.Parallel()
-	want := cli.Data{Location: "London", Unit: "metric"}
-	got := cli.Parse(os.Args)
+	locwant := "London"
+	unitwant := "metric"
+	locgot, unitgot := cli.Parse(os.Args)
 
-	if got != want {
-		t.Errorf("want %v, got %v", want, got)
+	if locgot != locwant || unitgot != unitwant {
+		t.Errorf("want %v - %v, got %v - %v", locwant, unitwant, locgot, unitgot)
 	}
 }
