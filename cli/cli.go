@@ -4,19 +4,12 @@ import (
 	"flag"
 )
 
-type Data struct {
-	Location string
-	Unit     string
-}
-
-func Parse(args []string) Data {
-	var data = Data{}
+func Parse(args []string) (string, string) {
 
 	city := flag.String("city", "London", "The city of which you want to know the current weather. Defaults to London")
-	unit := flag.String("unit", "metric", "Choose your unit for the temperature (metric|kelvin|meh). Defaults to metric.")
-	flag.Parse()
+	unit := flag.String("unit", "metric", "Choose your unit for the temperature (standard|metric|imperial). Defaults to metric.")
 
-	data.Location = *city
-	data.Unit = *unit
-	return data
+	flag.Parse()
+	return *city, *unit
+
 }
