@@ -10,7 +10,11 @@ var c, u *string
 
 func init() {
 	c = flag.String("city", "london", "enter city - required")
-	u = flag.String("unit", "metric", "pick one between metric and standard")
+	u = flag.String(
+		"unit",
+		"metric",
+		"pick one between metric and standard",
+	)
 }
 
 func Allowed(list []string, u string) bool {
@@ -31,7 +35,9 @@ func Parse(cmd []string) ([]string, error) {
 		err = errors.New("city not provided, you must specify one")
 	}
 	if !Allowed(allowedUnits, *u) || *u == "" {
-		err = errors.New("measure unit not allowed, defaulting to metric ")
+		err = errors.New(
+			"measure unit not allowed, defaulting to metric ",
+		)
 		*u = "metric"
 	}
 
