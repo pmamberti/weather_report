@@ -9,7 +9,11 @@ import (
 var c, u *string
 
 func init() {
-	c = flag.String("city", "london", "enter city - required")
+	c = flag.String(
+		"city",
+		"london",
+		"enter city - required",
+	)
 	u = flag.String(
 		"unit",
 		"metric",
