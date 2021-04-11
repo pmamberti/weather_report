@@ -16,7 +16,7 @@ func TestParse(t *testing.T) {
 		want        []string
 	}{
 		{
-			name:        "No Flags, use defaults.",
+			name:        "No Flags, use defaults",
 			args:        []string{"cmd"},
 			errExpected: false,
 			want:        []string{"london", "metric"},
