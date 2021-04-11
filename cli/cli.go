@@ -5,24 +5,6 @@ import (
 	"flag"
 )
 
-<<<<<<< HEAD
-var c, u *string
-
-func init() {
-	c = flag.String(
-		"city",
-		"london",
-		"enter city - required",
-	)
-	u = flag.String(
-		"unit",
-		"metric",
-		"pick one between metric and standard",
-	)
-}
-
-=======
->>>>>>> bdbf5d3eb4e9bf0352de31e4158ea3ab02ecfe0f
 func Allowed(list []string, u string) bool {
 	for _, s := range list {
 		if s == u {
@@ -36,7 +18,11 @@ func Parse(cmd []string) ([]string, error) {
 	var err error
 	arguments := flag.NewFlagSet("args", flag.ContinueOnError)
 	c := arguments.String("city", "london", "Required. Target city")
-	u := arguments.String("unit", "metric", "Optional. Temperature unit: Standard, Metric (default) or Imperial.")
+	u := arguments.String(
+		"unit",
+		"metric",
+		"Optional. Temperature unit: Standard, Metric (default) or Imperial.",
+	)
 	arguments.Parse(cmd[1:])
 
 	if *c == "" {
