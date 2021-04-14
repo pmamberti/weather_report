@@ -20,13 +20,21 @@ type WeatherData struct {
 	}
 }
 
-func GetWeather(location, unit string, err error) {
+type UnitSystem int
+
+var unitSystemName = map[UnitSystem]string{
+	0: "metric",
+	1: "standard",
+	2: "imperial",
+}
+
+func GetWeather(location string, unit UnitSystem) error {
 	api_key := os.Getenv("OWM_KEY")
 	if api_key == "" {
 		log.Fatalf("No API key found in env")
 	}
 
-	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?units=%v&q=%v&appid=%v", unit, url.PathEscape(location), api_key)
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?units=%v&q=%v&appid=%v", unitSystemName[UnitSystem(unit)], url.PathEscape(location), api_key)
 	res, err := http.Get(url)
 	fmt.Println(url)
 	if err != nil {
@@ -50,4 +58,6 @@ func GetWeather(location, unit string, err error) {
 	}
 
 	fmt.Printf("In %v, the weather is %v, with %v. \nThe temperature is %v degrees.", location, j.Weather[0].Main, j.Weather[0].Description, j.Main.Temp)
+
+	return nil
 }

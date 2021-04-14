@@ -2,6 +2,7 @@ package cli_test
 
 import (
 	"testing"
+	"weather_cli/api"
 	"weather_cli/cli"
 
 	"github.com/google/go-cmp/cmp"
@@ -13,13 +14,15 @@ func TestParse(t *testing.T) {
 		args        []string
 		errExpected bool
 		name        string
-		want        []string
+		city        string
+		unit        api.UnitSystem
 	}{
 		{
 			name:        "No Flags, use defaults",
 			args:        []string{"cmd"},
 			errExpected: false,
-			want:        []string{"london", "metric"},
+			city:        "london",
+			unit:        cli.UnitsMetric,
 		},
 		{
 			name: "Valid parameters",
@@ -29,19 +32,22 @@ func TestParse(t *testing.T) {
 				"--unit=standard",
 			},
 			errExpected: false,
-			want:        []string{"Rome", "standard"},
+			city:        "Rome",
+			unit:        cli.UnitsStandard,
 		},
 		{
 			name:        "Empty unit flag, default to `metric`",
 			args:        []string{"cmd", `--city=Paris`, `--unit=""`},
 			errExpected: true,
-			want:        []string{"Paris", "metric"},
+			city:        "Paris",
+			unit:        cli.UnitsMetric,
 		},
 		{
 			name:        "No unit flag, default to `metric`",
 			args:        []string{"cmd", `--city=Paris`},
 			errExpected: false,
-			want:        []string{"Paris", "metric"},
+			city:        "Paris",
+			unit:        cli.UnitsMetric,
 		},
 		{
 			name: "Empty Location flag",
@@ -51,7 +57,8 @@ func TestParse(t *testing.T) {
 				"--unit=\"metric\"",
 			},
 			errExpected: true,
-			want:        []string{"", "metric"},
+			city:        "",
+			unit:        cli.UnitsMetric,
 		},
 		{
 			name: "Unit flag value not allowed",
@@ -61,12 +68,24 @@ func TestParse(t *testing.T) {
 				`--unit="Hello"`,
 			},
 			errExpected: true,
-			want:        []string{"Las Palmas", "metric"},
+			city:        "Las Palmas",
+			unit:        cli.UnitsMetric,
+		},
+		{
+			name: "Unit flag value not allowed",
+			args: []string{
+				"cmd",
+				`--city="Moscow"`,
+				`--unit=imperial`,
+			},
+			errExpected: true,
+			city:        "Moscow",
+			unit:        cli.UnitsMetric,
 		},
 	}
 
 	for _, tc := range testCases {
-		got, err := cli.Parse(tc.args)
+		city, unit, err := cli.Parse(tc.args)
 		errReceived := err != nil
 
 		if tc.errExpected != errReceived {
@@ -78,13 +97,23 @@ func TestParse(t *testing.T) {
 			)
 		}
 
-		if !errReceived && !cmp.Equal(tc.want, got) {
+		if !errReceived && !cmp.Equal(tc.city, city) {
 			t.Errorf(
 				"%v - want %v, got %v instead",
 				tc.name,
-				tc.want,
-				got,
+				tc.city,
+				city,
 			)
 		}
+
+		if !errReceived && !cmp.Equal(tc.unit, unit) {
+			t.Errorf(
+				"%v - want %v, got %v instead",
+				tc.name,
+				tc.unit,
+				unit,
+			)
+		}
+
 	}
 }

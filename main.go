@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"weather_cli/api"
 	"weather_cli/cli"
 )
 
 func main() {
 	// cmd := []string{"cmd", "--city=\"London\"", "--unit=\"metric\""}
-	s, err := cli.Parse(os.Args)
-	fmt.Println(s, err)
+	city, unit, err := cli.Parse(os.Args)
+	fmt.Println(city, unit, err)
+	api.GetWeather(city, unit)
 }
