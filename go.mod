@@ -1,4 +1,4 @@
-module weather_cli
+module weather
 
 go 1.16
 

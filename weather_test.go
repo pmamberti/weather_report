@@ -1,9 +1,8 @@
-package cli_test
+package weather_test
 
 import (
 	"testing"
-	"weather_cli/api"
-	"weather_cli/cli"
+	"weather"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -15,14 +14,14 @@ func TestParse(t *testing.T) {
 		errExpected bool
 		name        string
 		city        string
-		unit        api.UnitSystem
+		unit        weather.UnitSystem
 	}{
 		{
 			name:        "No Flags, use defaults",
 			args:        []string{"cmd"},
 			errExpected: false,
 			city:        "london",
-			unit:        cli.UnitsMetric,
+			unit:        weather.UnitsMetric,
 		},
 		{
 			name: "Valid parameters",
@@ -33,21 +32,21 @@ func TestParse(t *testing.T) {
 			},
 			errExpected: false,
 			city:        "Rome",
-			unit:        cli.UnitsStandard,
+			unit:        weather.UnitsStandard,
 		},
 		{
 			name:        "Empty unit flag, default to `metric`",
 			args:        []string{"cmd", `--city=Paris`, `--unit=""`},
 			errExpected: true,
 			city:        "Paris",
-			unit:        cli.UnitsMetric,
+			unit:        weather.UnitsMetric,
 		},
 		{
 			name:        "No unit flag, default to `metric`",
 			args:        []string{"cmd", `--city=Paris`},
 			errExpected: false,
 			city:        "Paris",
-			unit:        cli.UnitsMetric,
+			unit:        weather.UnitsMetric,
 		},
 		{
 			name: "Empty Location flag",
@@ -58,7 +57,7 @@ func TestParse(t *testing.T) {
 			},
 			errExpected: true,
 			city:        "",
-			unit:        cli.UnitsMetric,
+			unit:        weather.UnitsMetric,
 		},
 		{
 			name: "Unit flag value not allowed",
@@ -69,7 +68,7 @@ func TestParse(t *testing.T) {
 			},
 			errExpected: true,
 			city:        "Las Palmas",
-			unit:        cli.UnitsMetric,
+			unit:        weather.UnitsMetric,
 		},
 		{
 			name: "Unit flag value not allowed",
@@ -80,12 +79,12 @@ func TestParse(t *testing.T) {
 			},
 			errExpected: true,
 			city:        "Moscow",
-			unit:        cli.UnitsMetric,
+			unit:        weather.UnitsMetric,
 		},
 	}
 
 	for _, tc := range testCases {
-		city, unit, err := cli.Parse(tc.args)
+		city, unit, err := weather.Parse(tc.args)
 		errReceived := err != nil
 
 		if tc.errExpected != errReceived {

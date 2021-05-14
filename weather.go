@@ -1,7 +1,9 @@
-package api
+package weather
 
 import (
 	"encoding/json"
+	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -31,7 +33,7 @@ var unitSystemName = map[UnitSystem]string{
 func GetWeatherData(location string, unit UnitSystem) (WeatherData, error) {
 	api_key := os.Getenv("OWM_KEY")
 	if api_key == "" {
-		log.Fatalf("No API key found in env")
+		log.Fatalf("Please set OWM_KEY environment variable")
 	}
 
 	url := fmt.Sprintf(
@@ -76,4 +78,64 @@ func PrintWeather(d WeatherData, location string) {
 		d.Weather[0].Description,
 		d.Main.Temp,
 	)
+}
+
+
+const (
+	UnitsMetric = iota
+	UnitsStandard
+	UnitsImperial
+)
+
+func convertUnits(s string) (UnitSystem, error) {
+	switch s {
+	case "metric":
+		return UnitsMetric, nil
+	case "standard":
+		return UnitsStandard, nil
+	case "imperial":
+		return UnitsImperial, nil
+	default:
+		return 0, fmt.Errorf("value not allowed %q must be one of metric standard or imperial", s)
+	}
+
+}
+
+func Parse(cmd []string) (city string, unit UnitSystem, err error) {
+	arguments := flag.NewFlagSet("args", flag.ExitOnError)
+	c := arguments.String("city", "london", "Required. Target city")
+	u := arguments.String("unit", "metric", "Optional. Temperature unit: Standard, Metric (default) or Imperial.")
+
+	if len(cmd) < 2 {
+		arguments.Parse([]string{})
+	} else {
+		arguments.Parse(cmd[1:])
+	}
+
+	unit, err = convertUnits(*u)
+	if err != nil {
+		return "", 0, err
+	}
+
+	if *c == "" {
+		err = errors.New("city cannot be empty - default to london")
+		arguments.PrintDefaults()
+	}
+
+	return *c, unit, err
+}
+
+func RunCLI(args []string, w io.Writer) {
+	city, unit, err := Parse(args)
+	if err != nil {
+		fmt.Printf("%v", err)
+		os.Exit(1)
+	}
+	var d WeatherData
+	d, err = GetWeatherData(city, unit)
+	if err != nil {
+		fmt.Printf("a %v", err)
+		os.Exit(1)
+	}
+	PrintWeather(d, city)
 }
