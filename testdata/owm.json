@@ -1,0 +1,43 @@
+{
+  "coord": {
+    "lon": -0.1257,
+    "lat": 51.5085
+  },
+  "weather": [
+    {
+      "id": 804,
+      "main": "Clouds",
+      "description": "overcast clouds",
+      "icon": "04d"
+    }
+  ],
+  "base": "stations",
+  "main": {
+    "temp": 12.04,
+    "feels_like": 11.15,
+    "temp_min": 11,
+    "temp_max": 13.33,
+    "pressure": 1010,
+    "humidity": 71
+  },
+  "visibility": 10000,
+  "wind": {
+    "speed": 2.57,
+    "deg": 50
+  },
+  "clouds": {
+    "all": 90
+  },
+  "dt": 1620997698,
+  "sys": {
+    "type": 1,
+    "id": 1414,
+    "country": "GB",
+    "sunrise": 1620965402,
+    "sunset": 1621021429
+  },
+  "timezone": 3600,
+  "id": 2643743,
+  "name": "London",
+  "cod": 200
+}
