@@ -28,7 +28,7 @@ func convertUnits(s string) (api.UnitSystem, error) {
 }
 
 func Parse(cmd []string) (city string, unit api.UnitSystem, err error) {
-	arguments := flag.NewFlagSet("args", flag.ContinueOnError)
+	arguments := flag.NewFlagSet("args", flag.ExitOnError)
 	c := arguments.String("city", "london", "Required. Target city")
 	u := arguments.String("unit", "metric", "Optional. Temperature unit: Standard, Metric (default) or Imperial.")
 

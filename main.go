@@ -10,6 +10,15 @@ import (
 func main() {
 	// cmd := []string{"cmd", "--city=\"London\"", "--unit=\"metric\""}
 	city, unit, err := cli.Parse(os.Args)
-	fmt.Println(city, unit, err)
-	api.GetWeather(city, unit)
+	if err != nil {
+		fmt.Printf("%v", err)
+		os.Exit(1)
+	}
+	var d api.WeatherData
+	d, err = api.GetWeatherData(city, unit)
+	if err != nil {
+		fmt.Printf("a %v", err)
+		os.Exit(1)
+	}
+	api.PrintWeather(d, city)
 }
