@@ -1,6 +1,10 @@
 package weather_test
 
 import (
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 	"weather"
 
@@ -113,6 +117,37 @@ func TestParse(t *testing.T) {
 				unit,
 			)
 		}
+	}
+}
 
+
+func TestGetWeatherData(t *testing.T) {
+	t.Parallel()
+	ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		f, err := os.Open("testdata/owm.json")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer f.Close()
+		io.Copy(w, f)
+	}))
+	APIKey := "dummy"
+	client, err := weather.NewClient(APIKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.BaseURL = ts.URL
+	client.HTTPClient = ts.Client()
+	got, err := client.GetWeatherData("London", weather.UnitsMetric)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := weather.WeatherData{
+		Summary: "Clouds",
+		Description: "overcast clouds",
+		Temp: 12.04,
+	}
+	if !cmp.Equal(want, got) {
+		t.Error(cmp.Diff(want, got))
 	}
 }

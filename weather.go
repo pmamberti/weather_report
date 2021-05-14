@@ -10,9 +10,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
 
-type WeatherData struct {
+type owmAPIResponse struct {
 	Weather []struct {
 		Main        string `json:"main"`
 		Description string `json:"description"`
@@ -20,6 +21,12 @@ type WeatherData struct {
 	Main struct {
 		Temp float64 `json:"temp"`
 	}
+}
+
+type WeatherData struct{
+	Summary string
+	Description string
+	Temp float64
 }
 
 type UnitSystem int
@@ -30,20 +37,35 @@ var unitSystemName = map[UnitSystem]string{
 	2: "imperial",
 }
 
-func GetWeatherData(location string, unit UnitSystem) (WeatherData, error) {
-	api_key := os.Getenv("OWM_KEY")
-	if api_key == "" {
-		log.Fatalf("Please set OWM_KEY environment variable")
-	}
+type Client struct {
+	APIKey string
+	BaseURL string
+	HTTPClient *http.Client
+}
 
+func NewClient(APIKey string) (Client, error) {
+	if APIKey == "" {
+		return Client{}, errors.New("empty API key")
+	}
+	return Client{
+		APIKey: APIKey,
+		BaseURL: "https://api.openweathermap.org",
+		HTTPClient: &http.Client{
+			Timeout: 5 * time.Second,
+		},
+	}, nil
+}
+
+func (c Client) GetWeatherData(location string, unit UnitSystem) (WeatherData, error) {
 	url := fmt.Sprintf(
-		"https://api.openweathermap.org/data/2.5/weather?units=%v&q=%v&appid=%v",
+		"%s/data/2.5/weather?units=%v&q=%v&appid=%v",
+		c.BaseURL,
 		unitSystemName[UnitSystem(unit)],
 		url.PathEscape(location),
-		api_key,
+		c.APIKey,
 	)
 
-	res, err := http.Get(url)
+	res, err := c.HTTPClient.Get(url)
 
 	if err != nil {
 		log.Fatalf("Cannot complete GET request: %v", err)
@@ -59,14 +81,17 @@ func GetWeatherData(location string, unit UnitSystem) (WeatherData, error) {
 	if err != nil {
 		log.Fatalf("Cannot read data from request body: %v", err)
 	}
-
-	var data WeatherData
+	var data owmAPIResponse
 	err = json.Unmarshal(resData, &data)
 	if err != nil {
 		log.Fatalf("Unable to Marshal data %v", err)
 	}
 
-	return data, nil
+	return WeatherData{
+		Summary: data.Weather[0].Main,
+		Description: data.Weather[0].Description,
+		Temp: data.Main.Temp,
+	}, nil
 }
 
 func PrintWeather(d WeatherData, location string) {
@@ -74,9 +99,9 @@ func PrintWeather(d WeatherData, location string) {
 	fmt.Printf(
 		"In %v, the weather is %v, with %v. \nThe temperature is %v degrees.",
 		location,
-		d.Weather[0].Main,
-		d.Weather[0].Description,
-		d.Main.Temp,
+		d.Summary,
+		d.Description,
+		d.Temp,
 	)
 }
 
@@ -128,13 +153,23 @@ func Parse(cmd []string) (city string, unit UnitSystem, err error) {
 func RunCLI(args []string, w io.Writer) {
 	city, unit, err := Parse(args)
 	if err != nil {
-		fmt.Printf("%v", err)
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	api_key := os.Getenv("OWM_KEY")
+	if api_key == "" {
+		fmt.Fprintln(os.Stderr, "Please set OWM_KEY environment variable")
+		os.Exit(1)
+	}
+	client, err := NewClient(api_key)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	var d WeatherData
-	d, err = GetWeatherData(city, unit)
+	d, err = client.GetWeatherData(city, unit)
 	if err != nil {
-		fmt.Printf("a %v", err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	PrintWeather(d, city)
